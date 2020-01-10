@@ -16,17 +16,21 @@ function renderUsers(month){
       month.users.map( user => {
         return(
             <User user={user} key={user.id} />
-        )})
+      )})
   )
 }
 
 function Month(props){
+  const classes = ["listOfUsers"];
+  if(props.month.displayUsers){
+    classes.push("displayUsers");
+  }
   return(
     <div className="monthContainer">
-      <div className="monthName" style={{backgroundColor: detectColor(props.month.count)}}>
-        {props.month.name + '  ' + props.month.count }
+      <div className="monthName" style={{backgroundColor: detectColor(props.month.count)}} onMouseEnter={props.onMouseEnter} onMouseLeave={props.onMouseLeave}>
+        {props.month.name + " (" + props.month.count + ")" }
       </div>
-      <table className="listOfUsers">
+      <table className={classes.join(' ')}>
         <tbody>
         {renderUsers(props.month)}
         </tbody>
@@ -46,7 +50,6 @@ function devideByMonthes(users){
   let monthes = initializeMonthes();
   users.forEach(user => {
     let dateOfBirth = new Date(user.dob);
-    console.log(dateOfBirth.getUTCMonth()+1 + " "+user.dob.slice(0,10));
     for(let i = 0; i < monthes.length; i++ ){
       if(dateOfBirth.getUTCMonth() === monthes[i].id){
         addUserToMonth(monthes[i], user);
@@ -67,7 +70,7 @@ function initializeMonthes(){
     name: monthNames[i],
     count: 0,
     users: [], 
-    state: false};
+    displayUsers: false};
     monthes.push(month);
   }
   return monthes;
@@ -93,10 +96,27 @@ class App extends Component {
           });
         })
     }
+
+    handleMouseEnter(id){
+      const monthes = this.state.monthes.concat();
+      const month = monthes.find(m => m.id === id);
+      month.displayUsers = true;
+      this.setState({ monthes});
+    }
+    handleMouseLeave(id){
+      const monthes = this.state.monthes.concat();
+      const month = monthes.find(m => m.id === id);
+      month.displayUsers = false;
+      this.setState({ monthes});
+    }
     renderMonthes(){
       return(this.state.monthes.map(month =>{
         return (
-          <Month month={month} key={month.name}/>
+          <Month 
+          month={month} 
+          key={month.id}
+          onMouseEnter={this.handleMouseEnter.bind(this, month.id)}
+          onMouseLeave={this.handleMouseLeave.bind(this, month.id)}/>
         )
       }))
     }
@@ -111,5 +131,4 @@ class App extends Component {
      ) 
   }
 }
-
 export default App;
